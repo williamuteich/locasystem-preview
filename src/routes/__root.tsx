@@ -30,18 +30,14 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
+      { title: "RentalPro" },
       { name: "description", content: "Equipamento Certo is a system for managing equipment rentals, streamlining operations for administrators and rental businesses." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
+      { property: "og:title", content: "RentalPro" },
       { property: "og:description", content: "Equipamento Certo is a system for managing equipment rentals, streamlining operations for administrators and rental businesses." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
+      { name: "twitter:title", content: "RentalPro" },
       { name: "twitter:description", content: "Equipamento Certo is a system for managing equipment rentals, streamlining operations for administrators and rental businesses." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f19d06af-445b-44cf-bea5-e249ae969932/id-preview-8eae9452--4e31d249-fb13-405f-a0b8-c19cae1a4984.lovable.app-1777078851776.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f19d06af-445b-44cf-bea5-e249ae969932/id-preview-8eae9452--4e31d249-fb13-405f-a0b8-c19cae1a4984.lovable.app-1777078851776.png" },
     ],
     links: [
       {
