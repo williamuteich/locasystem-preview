@@ -1,5 +1,5 @@
 import { writeFileSync, mkdirSync, copyFileSync, existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, resolve, dirname } from 'node:path';
 import { createServer } from 'node:http';
 
 // Import the SSR server handler built by TanStack Start
@@ -7,6 +7,22 @@ const { default: serverEntry } = await import(resolve('dist/server/server.js'));
 
 const PORT = 3999;
 const BASE = '/locasystem-preview';
+
+// All known routes to prerender (improves SEO + initial load on GitHub Pages)
+const ROUTES = [
+  '/',
+  '/admin',
+  '/admin/equipamentos',
+  '/admin/lojistas',
+  '/admin/relatorios',
+  '/lojista',
+  '/lojista/clientes',
+  '/lojista/equipamentos',
+  '/lojista/funcionarios',
+  '/lojista/locacoes',
+  '/lojista/painel',
+  '/lojista/relatorios',
+];
 
 // Start a minimal HTTP server to bridge native http → web fetch API
 const httpServer = createServer(async (req, res) => {
@@ -37,20 +53,41 @@ async function fetchHtml(path) {
 }
 
 const outDir = resolve('dist/client');
+let rootHtml = null;
 
-// Prerender login page (root)
-const html = await fetchHtml('/');
-if (html) {
-  writeFileSync(join(outDir, 'index.html'), html, 'utf-8');
-  console.log('✔ Wrote dist/client/index.html');
+// Prerender all known routes
+for (const route of ROUTES) {
+  const html = await fetchHtml(route);
+  if (!html) {
+    console.warn(`⚠ Skipping route ${route} (fetch failed)`);
+    continue;
+  }
 
-  // 404.html = same shell so SPA client-side routing works after first load
-  copyFileSync(join(outDir, 'index.html'), join(outDir, '404.html'));
-  console.log('✔ Wrote dist/client/404.html (SPA fallback)');
-} else {
+  // Determine output file path
+  // "/" → dist/client/index.html
+  // "/admin" → dist/client/admin/index.html
+  // "/admin/equipamentos" → dist/client/admin/equipamentos/index.html
+  const relativeDir = route === '/' ? '' : route;
+  const targetDir = join(outDir, relativeDir);
+  mkdirSync(targetDir, { recursive: true });
+  const targetFile = join(targetDir, 'index.html');
+
+  writeFileSync(targetFile, html, 'utf-8');
+  console.log(`✔ Wrote ${targetFile}`);
+
+  if (route === '/') {
+    rootHtml = html;
+  }
+}
+
+if (!rootHtml) {
   console.error('✖ Failed to fetch root HTML — index.html was NOT created');
   process.exit(1);
 }
+
+// 404.html = same shell so SPA client-side routing works for any unprerendered route
+copyFileSync(join(outDir, 'index.html'), join(outDir, '404.html'));
+console.log('✔ Wrote dist/client/404.html (SPA fallback)');
 
 // Disable Jekyll so GitHub Pages serves files starting with _
 writeFileSync(join(outDir, '.nojekyll'), '', 'utf-8');
